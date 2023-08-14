@@ -17,21 +17,22 @@
  */
 
 
-import {randID} from "@/tools/unique/unique";
-import {UError} from "@/types/errors/errors";
-import {sign} from "@/network/security/signature";
+import {InternalAxiosRequestConfig} from "axios/index";
+import {randID} from "../../tools/unique/unique";
+import {sign} from "./signature";
+import {UError} from "../../types/errors/errors";
 
 const Security            = "security"
 const Turn                = "turn"
-const HeaderPrefix        = "Twinkle-" //Uniform prefix
-const HeaderSecretPub   = HeaderPrefix + "Secret-Pub" //Secret Pub
-const HeaderTokenPub    = HeaderPrefix + "Token-Pub"  //Token Public
-const HeaderNonce       = HeaderPrefix + "Nonce"      //Nonce
-const HeaderTimestamp   = HeaderPrefix + "Timestamp"  //Timestamp
-const HeaderSignature   = HeaderPrefix + "Signature"  //Signature
-const HeaderTokenExpire = HeaderPrefix + "Expiration" //Token Expiration
+const HEADER_PREFIX        = "Twinkle-" //Uniform prefix
+const HeaderSecretPub   = HEADER_PREFIX + "Secret-Pub" //Secret Pub
+const HEADER_TOKEN_PUB    = HEADER_PREFIX + "Token-Pub"  //Token Public
+const HEADER_NONCE       = HEADER_PREFIX + "Nonce"      //Nonce
+const HEADER_TIMESTAMP   = HEADER_PREFIX + "Timestamp"  //Timestamp
+const HEADER_SIGNATURE   = HEADER_PREFIX + "Signature"  //Signature
+const Header_Token_Expire = HEADER_PREFIX + "Expiration" //Token Expiration
 
-const signWithHeaderKey: string[] = [HeaderNonce, HeaderTimestamp, HeaderTokenPub]
+const signWithHeaderKey: string[] = [HEADER_NONCE, HEADER_TIMESTAMP, HEADER_TOKEN_PUB]
 
 export interface HttpRequest {
     setHeader(key: string, value: string): void
@@ -41,39 +42,57 @@ export interface HttpRequest {
     getBody(): string
 }
 
-export function signature(req: HttpRequest, tokenPub: string, tokenPri: string): UError {
+export function signature(req: InternalAxiosRequestConfig, tokenPub: string, tokenPri: string): UError {
     const nonce = randID()
     const timestamp = new Date().getTime()
-    req.setHeader(HeaderTokenPub, tokenPub)
-    req.setHeader(HeaderNonce, nonce)
-    req.setHeader(HeaderTimestamp, timestamp.toString())
+    req.headers[HEADER_NONCE] = nonce
+    req.headers[HEADER_TIMESTAMP] = timestamp.toString()
+    req.headers[HEADER_TOKEN_PUB] = tokenPub
+    genSignature(req, "-----")
+
     return null
 }
 
-export function genSignature(req: HttpRequest, priKey: string): {signStr: string; err: UError} {
+export function genSignature(req: InternalAxiosRequestConfig, priKey: string): {signStr: string; err: UError} {
     const wrapper = new Map()
-    if(req.getQueryMap().size > 0){
-        doDataToMap(req.getQueryMap(), wrapper)
-    }
-    if(req.getPostForm().size > 0){
-        doDataToMap(req.getPostForm(), wrapper)
+
+    const params =req.params;
+
+    if (params) {
+        Object.keys(params).forEach((key: string) => {
+            const value = params[key];
+            console.error("----------->",`${key}: ${value}`);
+        });
     }
 
-    const sortedKeys = Object.keys(wrapper).sort()
-    let buf = ""
-    for (const key of sortedKeys) {
-        buf += wrapper.get(key)
-    }
+    // req.params
+    // const urlSearchParams = new URLSearchParams(req.url.search);
+    // console.error("----------->","urlSearchParams", urlSearchParams)
+    // urlSearchParams
+    // if(req.params.size > 0){
+    //     doDataToMap(req.getQueryMap(), wrapper)
+    // }
+    // if(req.getPostForm().size > 0){
+    //     doDataToMap(req.getPostForm(), wrapper)
+    // }
+    // req.bo
+    //
+    // const sortedKeys = Object.keys(wrapper).sort()
+    // let buf = ""
+    // for (const key of sortedKeys) {
+    //     buf += wrapper.get(key)
+    // }
+    //
+    // const bodyStr = req.getBody()
+    // if(bodyStr.length>0){
+    //     buf += bodyStr
+    // }
+    //
+    // for (const key of signWithHeaderKey) {
+    //     buf += req.getHeader(key)
+    // }
 
-    const bodyStr = req.getBody()
-    if(bodyStr.length>0){
-        buf += bodyStr
-    }
-
-    for (const key of signWithHeaderKey) {
-        buf += req.getHeader(key)
-    }
-
+    const buf = ""
     const { signStr, err} = sign(buf, priKey)
     return { signStr, err }
 }

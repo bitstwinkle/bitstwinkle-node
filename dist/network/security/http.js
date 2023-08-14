@@ -1,70 +1,44 @@
 "use strict";
-/*
- *
- *  *  * Copyright (C) 2023 The Developer bitstwinkle
- *  *  *
- *  *  * Licensed under the Apache License, Version 2.0 (the "License");
- *  *  * you may not use this file except in compliance with the License.
- *  *  * You may obtain a copy of the License at
- *  *  *
- *  *  *      http://www.apache.org/licenses/LICENSE-2.0
- *  *  *
- *  *  * Unless required by applicable law or agreed to in writing, software
- *  *  * distributed under the License is distributed on an "AS IS" BASIS,
- *  *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  *  * See the License for the specific language governing permissions and
- *  *  * limitations under the License.
- *
- */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.genSignature = exports.signature = void 0;
-const unique_1 = require("@/tools/unique/unique");
-const signature_1 = require("@/network/security/signature");
+const unique_1 = require("../../tools/unique/unique");
+const signature_1 = require("./signature");
 const Security = "security";
 const Turn = "turn";
-const HeaderPrefix = "Twinkle-"; //Uniform prefix
-const HeaderSecretPub = HeaderPrefix + "Secret-Pub"; //Secret Pub
-const HeaderTokenPub = HeaderPrefix + "Token-Pub"; //Token Public
-const HeaderNonce = HeaderPrefix + "Nonce"; //Nonce
-const HeaderTimestamp = HeaderPrefix + "Timestamp"; //Timestamp
-const HeaderSignature = HeaderPrefix + "Signature"; //Signature
-const HeaderTokenExpire = HeaderPrefix + "Expiration"; //Token Expiration
-const signWithHeaderKey = [HeaderNonce, HeaderTimestamp, HeaderTokenPub];
+const HEADER_PREFIX = "Twinkle-";
+const HeaderSecretPub = HEADER_PREFIX + "Secret-Pub";
+const HEADER_TOKEN_PUB = HEADER_PREFIX + "Token-Pub";
+const HEADER_NONCE = HEADER_PREFIX + "Nonce";
+const HEADER_TIMESTAMP = HEADER_PREFIX + "Timestamp";
+const HEADER_SIGNATURE = HEADER_PREFIX + "Signature";
+const Header_Token_Expire = HEADER_PREFIX + "Expiration";
+const signWithHeaderKey = [HEADER_NONCE, HEADER_TIMESTAMP, HEADER_TOKEN_PUB];
 function signature(req, tokenPub, tokenPri) {
     const nonce = (0, unique_1.randID)();
     const timestamp = new Date().getTime();
-    req.setHeader(HeaderTokenPub, tokenPub);
-    req.setHeader(HeaderNonce, nonce);
-    req.setHeader(HeaderTimestamp, timestamp.toString());
+    req.headers[HEADER_NONCE] = nonce;
+    req.headers[HEADER_TIMESTAMP] = timestamp.toString();
+    req.headers[HEADER_TOKEN_PUB] = tokenPub;
+    genSignature(req, "-----");
     return null;
 }
 exports.signature = signature;
 function genSignature(req, priKey) {
     const wrapper = new Map();
-    if (req.getQueryMap().size > 0) {
-        doDataToMap(req.getQueryMap(), wrapper);
+    const params = req.params;
+    if (params) {
+        Object.keys(params).forEach((key) => {
+            const value = params[key];
+            console.error("----------->", `${key}: ${value}`);
+        });
     }
-    if (req.getPostForm().size > 0) {
-        doDataToMap(req.getPostForm(), wrapper);
-    }
-    const sortedKeys = Object.keys(wrapper).sort();
-    let buf = "";
-    for (const key of sortedKeys) {
-        buf += wrapper.get(key);
-    }
-    const bodyStr = req.getBody();
-    if (bodyStr.length > 0) {
-        buf += bodyStr;
-    }
-    for (const key of signWithHeaderKey) {
-        buf += req.getHeader(key);
-    }
+    const buf = "";
     const { signStr, err } = (0, signature_1.sign)(buf, priKey);
     return { signStr, err };
 }
 exports.genSignature = genSignature;
 function doDataToMap(inputData, wrapper) {
-    if (inputData.size == 0) {
+    if (inputData.size === 0) {
         return null;
     }
     inputData.forEach((values, key) => {
@@ -83,3 +57,4 @@ function doDataToMap(inputData, wrapper) {
     });
     return null;
 }
+//# sourceMappingURL=http.js.map

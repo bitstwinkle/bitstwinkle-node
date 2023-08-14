@@ -16,29 +16,12 @@
  *
  */
 
+const tsConfigPaths = require('tsconfig-paths');
 
-export type LightToken = {
-    refreshTokenPub: string
-    refreshTokenExpire: Date
-    refreshToken: string
-    tokenPub: string
-    tokenExpire: Date
-    token: string
-}
+const baseUrl = './dist'; // 指定生成的 JavaScript 代码的根目录
+const { paths } = require('./tsconfig.json').compilerOptions;
 
-export type NodeToken = {
-    tokenPub: string
-    tokenExpire: Date
-    token: string
-}
-
-export function getEmptyToken(): LightToken {
-    return {
-        refreshTokenPub: '',
-        refreshTokenExpire: new Date(0),
-        refreshToken: '',
-        tokenPub: '',
-        tokenExpire: new Date(0),
-        token: '',
-    }
-}
+tsConfigPaths.register({
+    baseUrl,
+    paths,
+});

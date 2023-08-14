@@ -17,7 +17,7 @@
  */
 
 import { createHmac } from 'crypto';
-import {UError} from "@/types/errors/errors";
+import {UError} from "../../types/errors/errors";
 
 export function sign(data: string, token: string): { signStr: string; err: UError } {
     const key = Buffer.from(token);

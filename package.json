@@ -4,6 +4,8 @@
   "description": "The best collection of WEB2 and WEB3 feature packages on the entire internet.",
   "main": "dist/index.js",
   "scripts": {
+    "build": "npx tsc && npx tsconfig-paths compile",
+    "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "bitstwinkle",
@@ -11,6 +13,8 @@
   "devDependencies": {
     "@types/node": "^20.5.0",
     "@types/uuid": "^9.0.2",
+    "axios": "^1.4.0",
+    "tsconfig-paths": "^4.2.0",
     "uuid": "^9.0.0"
   }
 }
