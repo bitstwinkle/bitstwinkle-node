@@ -1,0 +1,16 @@
+{
+  "name": "bitstwinkle",
+  "version": "1.0.0",
+  "description": "The best collection of WEB2 and WEB3 feature packages on the entire internet.",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "bitstwinkle",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.5.0",
+    "@types/uuid": "^9.0.2",
+    "uuid": "^9.0.0"
+  }
+}
