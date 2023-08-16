@@ -1,21 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const client_1 = require("./network/rest/client");
-console.log("Hello, Bitstwinkle!");
-const lightCli = new client_1.LightClient({ BaseURL: "http://localhost:80" });
-const formData = new URLSearchParams();
-formData.append('username', 'john');
-formData.append('password', 'secret');
-lightCli.axios().request({
-    method: "post",
-    headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    url: "http://localhost:80/ping.do?a=5&b=6",
-    params: {
-        "aX": "aaaa",
-        "bX": true,
-    },
-    data: formData.toString()
+const node_1 = require("./network/rest/node");
+const sys_1 = require("./tools/sys/sys");
+node_1.node.initClientEnv({
+    baseURL: "http://localhost:80",
+    secretPub: '0xd8460d6F1AA7f71458e939063119838dc2c70f99',
+    secretPri: '0x2ae9d38c9adf4967488286b111ed3b511b57111b15e7eedca76e8caea228f99b',
 });
+const nodeCli = new node_1.node.Client();
+async function doCall() {
+    const resp = await nodeCli.call('/ping', {
+        "AAAA": "aa",
+        "BBBB": "bbb",
+        "BBAA": "bbb",
+        "AABB": "bbb",
+    });
+    console.log("resp--->---->", resp);
+    console.log("RUN_MODE", sys_1.sys.RUN_MODE);
+}
+doCall();
 //# sourceMappingURL=index.js.map

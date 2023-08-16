@@ -22,4 +22,4 @@ class UniError {
         return this.type === SYSTEM;
     }
 }
-//# sourceMappingURL=errors.js.map
+//# sourceMappingURL=io.js.map

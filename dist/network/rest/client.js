@@ -1,73 +1,38 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LightClient = void 0;
-const axios_1 = __importDefault(require("axios"));
-const security_1 = require("../security/security");
-const http_1 = require("../security/http");
-const DEFAULT_BITSTWINKLE_URL = "http://localhost:8080";
-class Client {
-    options;
-    axiosInstance;
-    constructor(options) {
-        this.options = options;
-        this.axiosInstance = axios_1.default.create({
-            baseURL: this.options.BaseURL,
+exports.axiosGetParams = exports.cli = void 0;
+var cli;
+(function (cli) {
+    cli.DEFAULT_BITSTWINKLE_URL = "http://localhost:8080";
+    class KVStore {
+        db = new Map;
+        get(key) {
+            return this.db.get(key);
+        }
+        set(key, val) {
+            this.db.set(key, val);
+        }
+    }
+    cli.KVStore = KVStore;
+})(cli || (exports.cli = cli = {}));
+function axiosGetParams(req) {
+    const wrapper = new Map();
+    if (req.params) {
+        Object.keys(req.params).forEach((key) => {
+            wrapper.set(key, req.params[key]);
         });
-        this.init();
     }
-    axios() {
-        return this.axiosInstance;
+    if (req.url) {
+        const idx = req.url.search('\\?');
+        if (idx > -1) {
+            const urlQuery = req.url.substring(idx);
+            const urlSearchParams = new URLSearchParams(urlQuery);
+            urlSearchParams.forEach((value, key) => {
+                wrapper.set(key, value);
+            });
+        }
     }
+    return wrapper;
 }
-class LightClient extends Client {
-    lightToken;
-    constructor(options) {
-        super(options);
-        this.lightToken = (0, security_1.getEmptyToken)();
-    }
-    init() {
-        this.axiosInstance.interceptors.request.use((request) => {
-            (0, http_1.signature)(request, this.lightToken.tokenPub, this.lightToken.token);
-            return request;
-        }, (error) => {
-            return Promise.reject(error);
-        });
-        this.axiosInstance.interceptors.response.use((response) => {
-            return response;
-        }, (error) => {
-            return Promise.reject(error);
-        });
-        return null;
-    }
-    exchangeToken() {
-        return null;
-    }
-}
-exports.LightClient = LightClient;
-class NodeClient extends Client {
-    constructor(options) {
-        super(options);
-        this.init();
-    }
-    exchangeToken() {
-        return null;
-    }
-    init() {
-        this.axiosInstance.interceptors.request.use((config) => {
-            config.headers['x'] = 'xx';
-            return config;
-        }, (error) => {
-            return Promise.reject(error);
-        });
-        this.axiosInstance.interceptors.response.use((response) => {
-            return response;
-        }, (error) => {
-            return Promise.reject(error);
-        });
-        return null;
-    }
-}
+exports.axiosGetParams = axiosGetParams;
 //# sourceMappingURL=client.js.map

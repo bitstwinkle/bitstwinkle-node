@@ -16,28 +16,37 @@
  *
  */
 
-type Type = number
+import {UError} from "./errors";
 
-const CODING: Type = -999
-const SYSTEM: Type = -444
-const APPLICATION: Type = -777
+export namespace io {
 
-export type UError = UniError | null
-
-class UniError {
-    constructor(public type: Type, public code: string, public message: string) {
+    export function Success<T>(data: T): Response<T> {
+        return new Response<T>(data, null)
     }
 
-    public IsApplication(): boolean {
-        return this.type === APPLICATION
+    export function Error<T>(err: UError): Response<T> {
+        return new Response<T>(null, err)
     }
 
-    public IsCoding(): boolean {
-        return this.type === CODING
-    }
+    export class Response<T> {
+        data: T | null
+        err: UError
 
-    public IsSystem(): boolean {
-        return this.type === SYSTEM
+        public constructor(data: T | null, err: UError) {
+            this.data = data
+            if (err) {
+                this.err = err
+            } else {
+                this.err = null
+            }
+        }
+
+        isSuccess(): boolean {
+            return this.err != null
+        }
+
+        getData(): T | null {
+            return this.data
+        }
     }
 }
-

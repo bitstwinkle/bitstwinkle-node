@@ -1,24 +1,31 @@
-import {LightClient} from "./network/rest/client";
+import {node} from "./network/rest/node";
+import {io} from "./types/io/io";
+import {sys} from "./tools/sys/sys";
 
-console.log("Hello, Bitstwinkle!");
+// console.log("Hello, Bitstwinkle!");
 
 
 
-const lightCli = new LightClient({BaseURL: "http://localhost:80"})
-
-const formData = new URLSearchParams();
-formData.append('username', 'john');
-formData.append('password', 'secret');
-
-lightCli.axios().request({
-    method: "post",
-    headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    url: "http://localhost:80/ping.do?a=5&b=6",
-    params: {
-        "aX": "aaaa",
-        "bX": true,
-    },
-    data: formData.toString()
+node.initClientEnv({
+    baseURL: "http://localhost:80",
+    secretPub: '0xd8460d6F1AA7f71458e939063119838dc2c70f99',
+    secretPri: '0x2ae9d38c9adf4967488286b111ed3b511b57111b15e7eedca76e8caea228f99b',
 })
+const nodeCli = new node.Client()
+
+async function doCall() {
+    const resp: io.Response<string> = await nodeCli.call(
+        '/ping',
+        {
+            "AAAA": "aa",
+            "BBBB": "bbb",
+            "BBAA": "bbb",
+            "AABB": "bbb",
+        })
+    console.log("resp--->---->", resp)
+    console.log("RUN_MODE", sys.RUN_MODE)
+}
+
+doCall()
+
+

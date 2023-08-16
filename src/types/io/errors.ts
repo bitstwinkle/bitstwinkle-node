@@ -16,13 +16,33 @@
  *
  */
 
-import { createHmac } from 'crypto';
-import {UError} from "../../types/errors/errors";
-
-export function sign(data: string, token: string): { signStr: string; err: UError } {
-    const key = Buffer.from(token);
-    const h = createHmac('sha256', key);
-    h.update(data);
-    const signature = h.digest('hex');
-    return {signStr: signature, err: null};
+type Type = number
+export namespace errors {
+    export const CODING: Type = -999
+    export const SYSTEM: Type = -444
+    export const APPLICATION: Type = -777
 }
+
+export type UError = {
+    type: Type
+    code: string
+    message: string
+} | null
+
+class UniError {
+    constructor(public type: Type, public code: string, public message: string) {
+    }
+
+    public IsApplication(): boolean {
+        return this.type === errors.APPLICATION
+    }
+
+    public IsCoding(): boolean {
+        return this.type === errors.CODING
+    }
+
+    public IsSystem(): boolean {
+        return this.type === errors.SYSTEM
+    }
+}
+

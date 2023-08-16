@@ -1,5 +1,6 @@
 {
   "name": "bitstwinkle",
+  "type": "commonjs",
   "version": "1.0.0",
   "description": "The best collection of WEB2 and WEB3 feature packages on the entire internet.",
   "main": "dist/index.js",
@@ -16,5 +17,8 @@
     "axios": "^1.4.0",
     "tsconfig-paths": "^4.2.0",
     "uuid": "^9.0.0"
+  },
+  "dependencies": {
+    "class-transformer": "^0.5.1"
   }
 }
