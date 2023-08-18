@@ -37,23 +37,33 @@ function doSign(
         for (const key of signHeader) {
             buf += key + '='
             buf += headers.get(key)
+            buf += ';'
         }
     }
 
     if (params) {
         const sortedKeys = Object.keys(params).sort()
         if (sys.isRd()) {
-            console.log("security.doSign.sortedKeys: ", sortedKeys)
+            console.log("[ security.doSign ] sortedKeys: ", sortedKeys)
         }
-
         for (const key of sortedKeys) {
             buf += key + '='
             buf += params.get(key)
+            buf += ';'
         }
     }
 
     if (body) {
-        buf += bodyInside + '=' + body
+        const bodyStr = JSON.stringify(body)
+        console.log("bodyStr======>", bodyStr)
+        const bodyPureStr = bodyStr.replaceAll(/"/g, '\\"')
+
+        console.log("bodyPureStr======>", bodyPureStr)
+        buf += bodyInside + '=' + bodyPureStr
+    }
+
+    if (sys.isRd()) {
+        console.log("[ security.doSign ] buf to sign: ", buf)
     }
 
     const key = Buffer.from(token);
@@ -104,7 +114,6 @@ export namespace security {
         }
 
         clone(src: IToken) {
-            console.log('src', src, ', this', this)
             // this.refreshTokenPub = src.refreshTokenPub
             // this.refreshTokenExpire = src.refreshTokenExpire
             // this.refreshTokenPri = src.refreshTokenPri
@@ -156,7 +165,7 @@ export namespace security {
             secretPri,
         )
         if (err) {
-            console.log("security.injectToken.err", err)
+            console.log("[ security.injectSecret ] err", err)
             return err
         }
         if (err) {
@@ -164,7 +173,7 @@ export namespace security {
         }
         setHeader(HEADER_SIGNATURE, signStr)
         if (sys.isRd()) {
-            console.log('security.injectSecret: signStr=', signStr)
+            console.log('[ security.injectSecret ] signStr=', signStr)
         }
         return null
     }
@@ -194,12 +203,12 @@ export namespace security {
             tokenPri,
             )
         if (err) {
-            console.log("security.injectToken.err", err)
+            console.log("[ security.injectToken ] err", err)
             return err
         }
         setHeader(HEADER_SIGNATURE, signStr)
         if (sys.isRd()) {
-            console.log('security.injectToken: signStr=', signStr)
+            console.log('[ security.injectToken ] signStr=', signStr)
         }
         return null
     }

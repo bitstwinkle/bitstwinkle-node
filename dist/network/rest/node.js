@@ -10,6 +10,7 @@ const security_1 = require("../security/security");
 const client_1 = require("./client");
 const sys_1 = require("../../tools/sys/sys");
 const io_1 = require("../../types/io/io");
+const aes_1 = require("../../tools/aes/aes");
 const NodeExchangeTokenURL = '/security/turn';
 var node;
 (function (node) {
@@ -42,7 +43,7 @@ var node;
         }
         async call(api, data) {
             const resp = await this.axiosInstance.post(api, data);
-            return resp.data.data;
+            return resp.data;
         }
         exchangeToken() {
             this.doExchangeToken();
@@ -61,19 +62,21 @@ var node;
                         return req.data;
                     });
                     if (err) {
-                        console.log("node auth security.injectSecret failed", err);
+                        console.log("[ node.client.injectSecret ] node auth security.injectSecret failed", err);
                     }
                     return req;
                 }
                 if (!this.token.isAvailable()) {
                     const err = await this.doExchangeToken();
                     if (err != null) {
-                        console.log("this.doExchangeToken failed", err);
+                        console.log("[ client.node.doExchangeToken ] failed", err);
                         throw new Error(err.message);
                     }
                 }
-                console.log('gLocalStore', gLocalStore);
-                console.log('this.token', this.token);
+                if (sys_1.sys.isRd()) {
+                    console.log('[ client.node.gLocalStore ]', gLocalStore);
+                    console.log('[ client.node.token ]', this.token);
+                }
                 const err = security_1.security.injectToken(this.token.tokenPub, this.token.tokenPri, (k, v) => {
                     req.headers[k] = v;
                 }, () => {
@@ -82,7 +85,7 @@ var node;
                     return req.data;
                 });
                 if (err) {
-                    console.log("node auth security.injectToken failed", err);
+                    console.log("[ node.client.injectToken ] node auth security.injectToken failed", err);
                 }
                 return req;
             }, (error) => {
@@ -105,22 +108,30 @@ var node;
                 if (sys_1.sys.isRd()) {
                     console.log('[', resp.request.path, '][', resp.status, "] ", resp.data);
                 }
-                resp.data = io_1.io.Success(resp.data);
                 const customResponse = {
                     ...resp,
                     data: io_1.io.Success(resp.data)
                 };
                 return customResponse;
             }, (error) => {
-                console.log("errrrrrr", error.message);
+                if (!error.request || !error.response) {
+                    const customResponse = {
+                        ...error.response,
+                        data: io_1.io.Error({
+                            code: "LOCAL_ERROR", type: errors_1.errors.SYSTEM,
+                            message: error.message
+                        })
+                    };
+                    return customResponse;
+                }
+                if (sys_1.sys.isRd()) {
+                    console.log('[', error.request.path, '][', error.response.status, "] ", error.response.data);
+                }
                 const customResponse = {
                     ...error.response,
-                    data: io_1.io.Error(error.response)
+                    data: io_1.io.Error(error.response.data)
                 };
-                return {
-                    data: io_1.io.Error(error.message),
-                    err: error.message
-                };
+                return customResponse;
             });
         }
         async doExchangeToken() {
@@ -128,10 +139,15 @@ var node;
             if (resp.err != null) {
                 return resp.err;
             }
-            console.log('doExchangeToken', resp.data);
+            if (sys_1.sys.isRd()) {
+                console.log('[ client.node.doExchangeToken ]', resp.data);
+            }
             if (resp.data) {
                 this.token.clone(resp.data);
-                gLocalStore.set("token", resp.data);
+                console.log("this.token.tokenPri", this.token.tokenPri);
+                console.log("this.options.secretPri", this.options.secretPri);
+                this.token.tokenPri = aes_1.aes.decrypt(this.token.tokenPri, this.options.secretPri);
+                gLocalStore.set("token", this.token);
             }
             return null;
         }

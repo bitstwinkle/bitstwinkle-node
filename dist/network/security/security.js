@@ -21,20 +21,29 @@ function doSign(signHeader, headers, params, body, token) {
         for (const key of signHeader) {
             buf += key + '=';
             buf += headers.get(key);
+            buf += ';';
         }
     }
     if (params) {
         const sortedKeys = Object.keys(params).sort();
         if (sys_1.sys.isRd()) {
-            console.log("security.doSign.sortedKeys: ", sortedKeys);
+            console.log("[ security.doSign ] sortedKeys: ", sortedKeys);
         }
         for (const key of sortedKeys) {
             buf += key + '=';
             buf += params.get(key);
+            buf += ';';
         }
     }
     if (body) {
-        buf += bodyInside + '=' + body;
+        const bodyStr = JSON.stringify(body);
+        console.log("bodyStr======>", bodyStr);
+        const bodyPureStr = bodyStr.replaceAll(/"/g, '\\"');
+        console.log("bodyPureStr======>", bodyPureStr);
+        buf += bodyInside + '=' + bodyPureStr;
+    }
+    if (sys_1.sys.isRd()) {
+        console.log("[ security.doSign ] buf to sign: ", buf);
     }
     const key = Buffer.from(token);
     const h = (0, crypto_1.createHmac)('sha256', key);
@@ -71,7 +80,6 @@ var security;
             this.tokenPri = '';
         }
         clone(src) {
-            console.log('src', src, ', this', this);
             this.tokenPub = src.token_pub;
             this.tokenPri = src.token_pri;
             this.tokenPri = src.token;
@@ -108,7 +116,7 @@ var security;
             set(HEADER_TIMESTAMP, timestamp).
             set(HEADER_TOKEN_PUB, secretPub), getParams(), getBody(), secretPri);
         if (err) {
-            console.log("security.injectToken.err", err);
+            console.log("[ security.injectSecret ] err", err);
             return err;
         }
         if (err) {
@@ -116,7 +124,7 @@ var security;
         }
         setHeader(HEADER_SIGNATURE, signStr);
         if (sys_1.sys.isRd()) {
-            console.log('security.injectSecret: signStr=', signStr);
+            console.log('[ security.injectSecret ] signStr=', signStr);
         }
         return null;
     }
@@ -132,12 +140,12 @@ var security;
             set(HEADER_TIMESTAMP, timestamp).
             set(HEADER_TOKEN_PUB, tokenPub), getParams(), getBody(), tokenPri);
         if (err) {
-            console.log("security.injectToken.err", err);
+            console.log("[ security.injectToken ] err", err);
             return err;
         }
         setHeader(HEADER_SIGNATURE, signStr);
         if (sys_1.sys.isRd()) {
-            console.log('security.injectToken: signStr=', signStr);
+            console.log('[ security.injectToken ] signStr=', signStr);
         }
         return null;
     }

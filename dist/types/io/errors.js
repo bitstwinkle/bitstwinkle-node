@@ -6,6 +6,10 @@ var errors;
     errors.CODING = -999;
     errors.SYSTEM = -444;
     errors.APPLICATION = -777;
+    function Sys(message) {
+        return new UniError(errors.SYSTEM, 'local_run_error', message);
+    }
+    errors.Sys = Sys;
 })(errors || (exports.errors = errors = {}));
 class UniError {
     type;

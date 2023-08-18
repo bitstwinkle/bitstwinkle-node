@@ -21,6 +21,10 @@ export namespace errors {
     export const CODING: Type = -999
     export const SYSTEM: Type = -444
     export const APPLICATION: Type = -777
+
+    export function Sys(message: string): UError {
+        return new UniError(errors.SYSTEM, 'local_run_error', message)
+    }
 }
 
 export type UError = {
@@ -45,4 +49,6 @@ class UniError {
         return this.type === errors.SYSTEM
     }
 }
+
+
 

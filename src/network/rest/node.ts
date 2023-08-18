@@ -22,6 +22,7 @@ import {security} from "../security/security";
 import {axiosGetParams, cli} from "./client";
 import {sys} from "../../tools/sys/sys";
 import {io} from "../../types/io/io";
+import {aes} from "../../tools/aes/aes";
 
 const NodeExchangeTokenURL = '/security/turn'
 
@@ -66,7 +67,7 @@ export namespace node {
 
         async call<D, R>(api: string, data: D): Promise<io.Response<R>> {
             const resp = await this.axiosInstance.post(api, data)
-            return resp.data.data as unknown as io.Response<R>
+            return resp.data as unknown as io.Response<R>
         }
 
         exchangeToken() {
@@ -93,20 +94,22 @@ export namespace node {
                                 return req.data
                             })
                         if (err) {
-                            console.log("node auth security.injectSecret failed", err)
+                            console.log("[ node.client.injectSecret ] node auth security.injectSecret failed", err)
                         }
                         return req
                     }
                     if (!this.token.isAvailable()) {
                         const err = await this.doExchangeToken()
                         if (err != null) {
-                            console.log("this.doExchangeToken failed", err)
+                            console.log("[ client.node.doExchangeToken ] failed", err)
                             throw new Error(err.message)
                         }
                     }
 
-                    console.log('gLocalStore', gLocalStore)
-                    console.log('this.token', this.token)
+                    if(sys.isRd()) {
+                        console.log('[ client.node.gLocalStore ]', gLocalStore)
+                        console.log('[ client.node.token ]', this.token)
+                    }
                     const err = security.injectToken(
                         this.token.tokenPub,
                         this.token.tokenPri,
@@ -120,7 +123,7 @@ export namespace node {
                             return req.data
                         })
                     if (err) {
-                        console.log("node auth security.injectToken failed", err)
+                        console.log("[ node.client.injectToken ] node auth security.injectToken failed", err)
                     }
                     return req
                 },
@@ -147,7 +150,6 @@ export namespace node {
                     if (sys.isRd()) {
                         console.log('[', resp.request.path, '][', resp.status, "] ", resp.data)
                     }
-                    resp.data = io.Success(resp.data)
                     const customResponse: AxiosResponse<io.Response<any>> = {
                         ...resp,
                         data: io.Success(resp.data)
@@ -155,22 +157,24 @@ export namespace node {
                     return customResponse
                 },
                 (error) => {
-                    console.log("errrrrrr", error.message)
+                    if(!error.request || !error.response){
+                        const customResponse: AxiosResponse<io.Response<any>> = {
+                            ...error.response,
+                            data: io.Error({
+                                code: "LOCAL_ERROR", type: errors.SYSTEM,
+                                message: error.message
+                            })
+                        }
+                        return customResponse
+                    }
+                    if(sys.isRd()){
+                        console.log('[', error.request.path, '][', error.response.status, "] ", error.response.data)
+                    }
                     const customResponse: AxiosResponse<io.Response<any>> = {
                         ...error.response,
-                        data: io.Error(error.response)
+                        data: io.Error(error.response.data)
                     }
-                    return {
-                        data: io.Error(error.message),
-                        err: error.message
-                    }
-                    // security.analyzeResponse((k: string): any => {
-                    //     return error.response.headers[k]
-                    // })
-                    // if (sys.isRd()) {
-                    //     console.log('[', error.request.path, '][', error.response.status, "] ", error.response.data)
-                    // }
-                    // return io.Error(error.response.data)
+                    return customResponse
                 }
             )
         }
@@ -180,10 +184,15 @@ export namespace node {
             if (resp.err != null) {
                 return resp.err
             }
-            console.log('doExchangeToken', resp.data)
+            if(sys.isRd()) {
+                console.log('[ client.node.doExchangeToken ]', resp.data)
+            }
             if (resp.data) {
                 this.token.clone(resp.data)
-                gLocalStore.set("token", resp.data)
+                console.log("this.token.tokenPri", this.token.tokenPri)
+                console.log("this.options.secretPri", this.options.secretPri)
+                this.token.tokenPri = aes.decrypt(this.token.tokenPri, this.options.secretPri)
+                gLocalStore.set("token", this.token)
             }
             return null;
         }

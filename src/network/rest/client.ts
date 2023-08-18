@@ -16,7 +16,6 @@
  *
  */
 
-import {UError} from "../../types/io/errors";
 import {io} from "../../types/io/io";
 import {InternalAxiosRequestConfig} from "axios";
 
