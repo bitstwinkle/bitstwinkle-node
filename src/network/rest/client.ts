@@ -28,10 +28,6 @@ export namespace cli {
         set<V>(key: string, val: V): void
     }
 
-    export interface Client {
-        call<D, R>(api: string, data: D): Promise<io.Response<R>>
-    }
-
     export class KVStore implements IStore{
         private db = new Map<string, any>
 

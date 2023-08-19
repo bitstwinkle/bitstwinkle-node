@@ -14,7 +14,7 @@ export declare namespace security {
         tokenExpire: Date;
         tokenPri: string;
         constructor();
-        clone(src: IToken): void;
+        from(src: IToken): void;
         isAvailable(): boolean;
     }
     function injectSecret(secretPub: string, secretPri: string, setHeader: (k: any, v: any) => void, getParams: () => Map<string, string>, getBody: () => string | null): UError;

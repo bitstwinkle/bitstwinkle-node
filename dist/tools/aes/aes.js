@@ -33,25 +33,20 @@ var aes;
         }
         const keyBuf = Buffer.from(key, 'hex');
         const plaintext = Buffer.from(content, 'utf8');
-        console.log('plaintext', plaintext, "content", content);
         const iv = crypto.randomBytes(16);
         if (!iv) {
-            console.log('crypto.randomBytes(16) error: !iv');
+            console.log('[ crypto.randomBytes(16) ] error: !iv');
             return '';
         }
-        console.log('entry iv: ', iv);
         let block;
         try {
             block = crypto.createCipheriv('aes-256-cbc', keyBuf, iv);
         }
         catch (err) {
-            console.log('crypto.createCipheriv error', err);
+            console.log('[ crypto.createCipheriv ] error', err);
             return '';
         }
-        const paddedPlaintext = plaintext;
-        console.log("paddedPlaintext", paddedPlaintext);
-        const ciphertext = Buffer.concat([iv, block.update(paddedPlaintext), block.final()]);
-        console.log('entry result: ', ciphertext.toString('hex'));
+        const ciphertext = Buffer.concat([iv, block.update(plaintext), block.final()]);
         return ciphertext.toString('hex');
     }
     aes.encrypt = encrypt;
@@ -61,19 +56,15 @@ var aes;
                 key = key.substring(2);
             }
             const keyBuf = Buffer.from(key, 'hex');
-            console.log("keyBuf", keyBuf);
             const ciphertext = Buffer.from(content, 'hex');
-            console.log("ciphertext", ciphertext);
             const iv = ciphertext.subarray(0, 16);
-            console.log("iv", iv);
             const block = crypto.createDecipheriv('aes-256-cbc', keyBuf, iv);
             let decrypted = block.update(ciphertext.subarray(16));
-            console.log('decrypted', decrypted);
             decrypted = Buffer.concat([decrypted, block.final()]);
             return decrypted.toString();
         }
         catch (error) {
-            console.log('aes.decrypt failed', error);
+            console.log('[ aes.decrypt failed ]', error);
             return '';
         }
     }

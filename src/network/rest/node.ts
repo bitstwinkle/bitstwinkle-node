@@ -22,7 +22,8 @@ import {security} from "../security/security";
 import {axiosGetParams, cli} from "./client";
 import {sys} from "../../tools/sys/sys";
 import {io} from "../../types/io/io";
-import {aes} from "../../tools/aes/aes";
+import {aes} from "../../tools/aes/aes.node";
+import {network} from "../network";
 
 const NodeExchangeTokenURL = '/security/turn'
 
@@ -51,7 +52,7 @@ export namespace node {
         gLocalStore.set('token', new security.Token())
     }
 
-    export class Client implements cli.Client {
+    export class Client implements network.IClient {
         private options: Options
         private axiosInstance: AxiosInstance
         private token: security.Token
@@ -66,6 +67,9 @@ export namespace node {
         }
 
         async call<D, R>(api: string, data: D): Promise<io.Response<R>> {
+            if(sys.isRd()){
+                console.log('[ system run mode ] : ', sys.RUN_MODE)
+            }
             const resp = await this.axiosInstance.post(api, data)
             return resp.data as unknown as io.Response<R>
         }
@@ -78,7 +82,7 @@ export namespace node {
             this.axiosInstance.interceptors.request.use(
                 async (req: InternalAxiosRequestConfig): Promise<InternalAxiosRequestConfig> => {
                     if (sys.isRd()) {
-                        console.log('[', req.url, "] ", req.data)
+                        console.log('[ api: ', req.url, "] ", req.data)
                     }
                     if (req.url?.endsWith(NodeExchangeTokenURL)) {
                         const err = security.injectSecret(
@@ -107,7 +111,6 @@ export namespace node {
                     }
 
                     if(sys.isRd()) {
-                        console.log('[ client.node.gLocalStore ]', gLocalStore)
                         console.log('[ client.node.token ]', this.token)
                     }
                     const err = security.injectToken(
@@ -129,7 +132,7 @@ export namespace node {
                 },
                 (error) => {
                     if (sys.isRd()) {
-                        console.log('[', error.request.path, '] ', error)
+                        console.log('[ api.err: ', error.request.path, '] ', error)
                     }
                     return Promise.reject({
                         data: null,
@@ -148,7 +151,7 @@ export namespace node {
                         return resp.headers[k]
                     })
                     if (sys.isRd()) {
-                        console.log('[', resp.request.path, '][', resp.status, "] ", resp.data)
+                        console.log('[ api.resp: ', resp.request.path, '][', resp.status, "] ", resp.data)
                     }
                     const customResponse: AxiosResponse<io.Response<any>> = {
                         ...resp,
@@ -168,7 +171,7 @@ export namespace node {
                         return customResponse
                     }
                     if(sys.isRd()){
-                        console.log('[', error.request.path, '][', error.response.status, "] ", error.response.data)
+                        console.log('[ api.resp.err: ', error.request.path, '][', error.response.status, "] ", error.response.data)
                     }
                     const customResponse: AxiosResponse<io.Response<any>> = {
                         ...error.response,
@@ -184,13 +187,8 @@ export namespace node {
             if (resp.err != null) {
                 return resp.err
             }
-            if(sys.isRd()) {
-                console.log('[ client.node.doExchangeToken ]', resp.data)
-            }
             if (resp.data) {
-                this.token.clone(resp.data)
-                console.log("this.token.tokenPri", this.token.tokenPri)
-                console.log("this.options.secretPri", this.options.secretPri)
+                this.token.from(resp.data)
                 this.token.tokenPri = aes.decrypt(this.token.tokenPri, this.options.secretPri)
                 gLocalStore.set("token", this.token)
             }

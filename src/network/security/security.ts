@@ -43,7 +43,7 @@ function doSign(
 
     if (params) {
         const sortedKeys = Object.keys(params).sort()
-        if (sys.isRd()) {
+        if (sys.isRd() && sortedKeys.length>0) {
             console.log("[ security.doSign ] sortedKeys: ", sortedKeys)
         }
         for (const key of sortedKeys) {
@@ -55,15 +55,12 @@ function doSign(
 
     if (body) {
         const bodyStr = JSON.stringify(body)
-        console.log("bodyStr======>", bodyStr)
-        const bodyPureStr = bodyStr.replaceAll(/"/g, '\\"')
-
-        console.log("bodyPureStr======>", bodyPureStr)
+        const bodyPureStr = bodyStr.replaceAll(/"/g, '\"')
         buf += bodyInside + '=' + bodyPureStr
     }
 
     if (sys.isRd()) {
-        console.log("[ security.doSign ] buf to sign: ", buf)
+        console.log("[ security.doSign ] buf to sign:", buf)
     }
 
     const key = Buffer.from(token);
@@ -113,14 +110,13 @@ export namespace security {
             this.tokenPri = ''
         }
 
-        clone(src: IToken) {
+        from(src: IToken) {
             // this.refreshTokenPub = src.refreshTokenPub
             // this.refreshTokenExpire = src.refreshTokenExpire
             // this.refreshTokenPri = src.refreshTokenPri
             this.tokenPub = src.token_pub
-            // this.tokenExpire = src.token_expire
+            this.tokenExpire = new Date(parseInt(src.token_expire))
             this.tokenPri = src.token_pri
-            this.tokenPri = src.token
         }
 
         isAvailable(): boolean {

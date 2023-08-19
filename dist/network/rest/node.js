@@ -42,6 +42,9 @@ var node;
             this.doInit();
         }
         async call(api, data) {
+            if (sys_1.sys.isRd()) {
+                console.log('[ system run mode ] : ', sys_1.sys.RUN_MODE);
+            }
             const resp = await this.axiosInstance.post(api, data);
             return resp.data;
         }
@@ -51,7 +54,7 @@ var node;
         doInit() {
             this.axiosInstance.interceptors.request.use(async (req) => {
                 if (sys_1.sys.isRd()) {
-                    console.log('[', req.url, "] ", req.data);
+                    console.log('[ api: ', req.url, "] ", req.data);
                 }
                 if (req.url?.endsWith(NodeExchangeTokenURL)) {
                     const err = security_1.security.injectSecret(this.options.secretPub, this.options.secretPri, (k, v) => {
@@ -74,7 +77,6 @@ var node;
                     }
                 }
                 if (sys_1.sys.isRd()) {
-                    console.log('[ client.node.gLocalStore ]', gLocalStore);
                     console.log('[ client.node.token ]', this.token);
                 }
                 const err = security_1.security.injectToken(this.token.tokenPub, this.token.tokenPri, (k, v) => {
@@ -90,7 +92,7 @@ var node;
                 return req;
             }, (error) => {
                 if (sys_1.sys.isRd()) {
-                    console.log('[', error.request.path, '] ', error);
+                    console.log('[ api.err: ', error.request.path, '] ', error);
                 }
                 return Promise.reject({
                     data: null,
@@ -106,7 +108,7 @@ var node;
                     return resp.headers[k];
                 });
                 if (sys_1.sys.isRd()) {
-                    console.log('[', resp.request.path, '][', resp.status, "] ", resp.data);
+                    console.log('[ api.resp: ', resp.request.path, '][', resp.status, "] ", resp.data);
                 }
                 const customResponse = {
                     ...resp,
@@ -125,7 +127,7 @@ var node;
                     return customResponse;
                 }
                 if (sys_1.sys.isRd()) {
-                    console.log('[', error.request.path, '][', error.response.status, "] ", error.response.data);
+                    console.log('[ api.resp.err: ', error.request.path, '][', error.response.status, "] ", error.response.data);
                 }
                 const customResponse = {
                     ...error.response,
@@ -139,13 +141,8 @@ var node;
             if (resp.err != null) {
                 return resp.err;
             }
-            if (sys_1.sys.isRd()) {
-                console.log('[ client.node.doExchangeToken ]', resp.data);
-            }
             if (resp.data) {
-                this.token.clone(resp.data);
-                console.log("this.token.tokenPri", this.token.tokenPri);
-                console.log("this.options.secretPri", this.options.secretPri);
+                this.token.from(resp.data);
                 this.token.tokenPri = aes_1.aes.decrypt(this.token.tokenPri, this.options.secretPri);
                 gLocalStore.set("token", this.token);
             }

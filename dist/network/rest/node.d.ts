@@ -1,6 +1,6 @@
 import { UError } from "../../types/io/errors";
-import { cli } from "./client";
 import { io } from "../../types/io/io";
+import { network } from "../network";
 export declare namespace node {
     type Options = {
         baseURL: string;
@@ -8,7 +8,7 @@ export declare namespace node {
         secretPri: string;
     };
     export function initClientEnv(options: Options): void;
-    export class Client implements cli.Client {
+    export class Client implements network.IClient {
         private options;
         private axiosInstance;
         private token;

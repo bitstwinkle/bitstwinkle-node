@@ -16,5 +16,21 @@
  *
  */
 
-type TimeString = string
+export namespace ref {
+    export type Scope = {
+        vn: string
+        jd: string
+        code: string
+    }
+
+    export type Collar = {
+        code: string
+        id: string
+    }
+
+    export type Lead = {
+        owner: Collar
+        code: string
+    }
+}
 

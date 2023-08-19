@@ -16,16 +16,13 @@
  *
  */
 
-class Collar {
-    constructor(public code: string, public id: string) {
-    }
-}
+export namespace times {
+    export type String = string
 
-class Ref {
-
-}
-
-class Lead {
-    constructor(public owner: Collar, public code: string) {
+    export function getTime(timeStr: String|undefined): Date {
+        if(!timeStr){
+            return new Date()
+        }
+        return new Date(timeStr);
     }
 }

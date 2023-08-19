@@ -26,7 +26,7 @@ function doSign(signHeader, headers, params, body, token) {
     }
     if (params) {
         const sortedKeys = Object.keys(params).sort();
-        if (sys_1.sys.isRd()) {
+        if (sys_1.sys.isRd() && sortedKeys.length > 0) {
             console.log("[ security.doSign ] sortedKeys: ", sortedKeys);
         }
         for (const key of sortedKeys) {
@@ -37,13 +37,11 @@ function doSign(signHeader, headers, params, body, token) {
     }
     if (body) {
         const bodyStr = JSON.stringify(body);
-        console.log("bodyStr======>", bodyStr);
-        const bodyPureStr = bodyStr.replaceAll(/"/g, '\\"');
-        console.log("bodyPureStr======>", bodyPureStr);
+        const bodyPureStr = bodyStr.replaceAll(/"/g, '\"');
         buf += bodyInside + '=' + bodyPureStr;
     }
     if (sys_1.sys.isRd()) {
-        console.log("[ security.doSign ] buf to sign: ", buf);
+        console.log("[ security.doSign ] buf to sign:", buf);
     }
     const key = Buffer.from(token);
     const h = (0, crypto_1.createHmac)('sha256', key);
@@ -79,10 +77,10 @@ var security;
             this.tokenExpire = new Date(0);
             this.tokenPri = '';
         }
-        clone(src) {
+        from(src) {
             this.tokenPub = src.token_pub;
+            this.tokenExpire = new Date(parseInt(src.token_expire));
             this.tokenPri = src.token_pri;
-            this.tokenPri = src.token;
         }
         isAvailable() {
             if (this.tokenPri.length === 0 || this.tokenPub.length === 0) {
