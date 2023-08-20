@@ -16,14 +16,14 @@
  *  *  * limitations under the License.
  *
  */
-
-export namespace browser {
-    // class Client extends Client{
-    //
-    // }
-    // function getStore(): Client {
-    //     return Store(){
-    //
-    //     }
-    // }
-}
+//
+// export namespace browser {
+//     // class Client extends Client{
+//     //
+//     // }
+//     // function getStore(): Client {
+//     //     return Store(){
+//     //
+//     //     }
+//     // }
+// }

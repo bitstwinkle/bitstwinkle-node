@@ -15,52 +15,56 @@
  *  *  * limitations under the License.
  *
  */
-
-import {io} from "../../types/io/io";
-import {InternalAxiosRequestConfig} from "axios";
-
-
-export namespace cli {
-    export const DEFAULT_BITSTWINKLE_URL = "http://localhost:8080"
-
-    export interface IStore {
-        get<V>(key: string): V
-        set<V>(key: string, val: V): void
-    }
-
-    export class KVStore implements IStore{
-        private db = new Map<string, any>
-
-        get<V>(key: string): V {
-            return this.db.get(key);
-        }
-
-        set<V>(key: string, val: V): void {
-            this.db.set(key, val)
-        }
-
-    }
-}
-
-export function axiosGetParams(req: InternalAxiosRequestConfig): Map<string, string> {
-    const wrapper = new Map<string, string>()
-
-    if (req.params) {
-        Object.keys(req.params).forEach((key: string) => {
-            wrapper.set(key, req.params[key])
-        });
-    }
-
-    if(req.url){
-        const idx = req.url.search('\\?')
-        if(idx>-1) {
-            const urlQuery = req.url.substring(idx)
-            const urlSearchParams = new URLSearchParams(urlQuery);
-            urlSearchParams.forEach((value: string, key: string) => {
-                wrapper.set(key, value)
-            });
-        }
-    }
-
-    return wrapper
-}
+//
+// import {io} from "../../types/io/io";
+// import {InternalAxiosRequestConfig} from "axios";
+//
+//
+// export namespace cli {
+//     export const DEFAULT_BITSTWINKLE_URL = "http://localhost:8080"
+//
+//     export interface IStore {
+//         get<V>(key: string): V
+//         set<V>(key: string, val: V): void
+//     }
+//
+//     export class KVStore implements IStore{
+//         private db = new Map<string, any>
+//
+//         get<V>(key: string): V {
+//             return this.db.get(key);
+//         }
+//
+//         set<V>(key: string, val: V): void {
+//             this.db.set(key, val)
+//         }
+//
+//         dump(): void {
+//             console.log("KVStore: ", this.db)
+//         }
+//
+//     }
+// }
+//
+// export function axiosGetParams(req: InternalAxiosRequestConfig): Map<string, string> {
+//     const wrapper = new Map<string, string>()
+//
+//     if (req.params) {
+//         Object.keys(req.params).forEach((key: string) => {
+//             wrapper.set(key, req.params[key])
+//         });
+//     }
+//
+//     if(req.url){
+//         const idx = req.url.search('\\?')
+//         if(idx>-1) {
+//             const urlQuery = req.url.substring(idx)
+//             const urlSearchParams = new URLSearchParams(urlQuery);
+//             urlSearchParams.forEach((value: string, key: string) => {
+//                 wrapper.set(key, value)
+//             });
+//         }
+//     }
+//
+//     return wrapper
+// }

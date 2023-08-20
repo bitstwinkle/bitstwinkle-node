@@ -1,0 +1,10 @@
+import { AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import { errors } from "../../types/errors";
+import { network } from "../network";
+export declare function axiosOnBeforeReq(req: InternalAxiosRequestConfig): Promise<InternalAxiosRequestConfig>;
+export declare function axiosOnReqError(error: any): Promise<never>;
+export declare function axiosOnAfterResp(resp: AxiosResponse): AxiosResponse<network.Response<any>, any>;
+export declare function axiosOnRespError(error: any): AxiosResponse<network.Response<any>, any>;
+export declare function doTurnBySecret(): Promise<errors.Error>;
+export declare function doTurnByRefreshToken(): Promise<errors.Error>;
+export declare function axiosGetParams(req: InternalAxiosRequestConfig): Map<string, string>;

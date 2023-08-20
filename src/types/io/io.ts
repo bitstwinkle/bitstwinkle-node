@@ -15,38 +15,38 @@
  *  *  * limitations under the License.
  *
  */
-
-import {UError} from "./errors";
-
-export namespace io {
-
-    export function Success<T>(data: T): Response<T> {
-        return new Response<T>(data, null)
-    }
-
-    export function Error<T>(err: UError): Response<T> {
-        return new Response<T>(null, err)
-    }
-
-    export class Response<T> {
-        data: T | null
-        err: UError
-
-        public constructor(data: T | null, err: UError) {
-            this.data = data
-            if (err) {
-                this.err = err
-            } else {
-                this.err = null
-            }
-        }
-
-        isSuccess(): boolean {
-            return this.err != null
-        }
-
-        getData(): T | null {
-            return this.data
-        }
-    }
-}
+//
+// import {UError} from "./errors";
+//
+// export namespace io {
+//
+//     export function Success<T>(data: T): Response<T> {
+//         return new Response<T>(data, null)
+//     }
+//
+//     export function Error<T>(err: UError): Response<T> {
+//         return new Response<T>(null, err)
+//     }
+//
+//     export class Response<T> {
+//         data: T | null
+//         err: UError
+//
+//         public constructor(data: T | null, err: UError) {
+//             this.data = data
+//             if (err) {
+//                 this.err = err
+//             } else {
+//                 this.err = null
+//             }
+//         }
+//
+//         isSuccess(): boolean {
+//             return this.err != null
+//         }
+//
+//         getData(): T | null {
+//             return this.data
+//         }
+//     }
+// }

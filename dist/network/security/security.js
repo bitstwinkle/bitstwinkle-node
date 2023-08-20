@@ -10,10 +10,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getEmptyNodeToken = exports.getEmptyToken = exports.security = void 0;
-const crypto_1 = require("crypto");
-const unique_1 = require("../../tools/unique/unique");
-const sys_1 = require("../../tools/sys/sys");
+const unique_1 = require("../../tools/unique");
+const sys_1 = require("../../tools/sys");
 const class_transformer_1 = require("class-transformer");
+const crypto_1 = require("../../tools/crypto");
 const bodyInside = '__b_o_d_y__';
 function doSign(signHeader, headers, params, body, token) {
     let buf = '';
@@ -41,12 +41,9 @@ function doSign(signHeader, headers, params, body, token) {
         buf += bodyInside + '=' + bodyPureStr;
     }
     if (sys_1.sys.isRd()) {
-        console.log("[ security.doSign ] buf to sign:", buf);
+        console.log("[ security.doSign ] buf to sign:", buf, " use token: " + token);
     }
-    const key = Buffer.from(token);
-    const h = (0, crypto_1.createHmac)('sha256', key);
-    h.update(buf);
-    const signature = h.digest('hex');
+    const signature = crypto_1.crypto.sha256(buf, token);
     return { signStr: signature, err: null };
 }
 const Security = "security";
@@ -97,6 +94,21 @@ var security;
             }
             return true;
         }
+        isRefreshAvailable() {
+            if (this.refreshTokenPri.length === 0 || this.refreshTokenPub.length === 0) {
+                if (sys_1.sys.isRd()) {
+                    console.log('[ security.isAvailable ] refresh token empty, or refresh token pub empty');
+                }
+                return false;
+            }
+            if (this.refreshTokenExpire < new Date()) {
+                if (sys_1.sys.isRd()) {
+                    console.log('[ security.isAvailable ] refresh token expire');
+                }
+                return false;
+            }
+            return true;
+        }
     }
     __decorate([
         (0, class_transformer_1.Expose)({ name: 'token_pub' }),
@@ -104,15 +116,15 @@ var security;
     ], Token.prototype, "tokenPub", void 0);
     security.Token = Token;
     function injectSecret(secretPub, secretPri, setHeader, getParams, getBody) {
-        const nonce = (0, unique_1.randID)();
+        const nonce = unique_1.unique.randID();
         const timestamp = new Date().getTime();
         setHeader(HEADER_NONCE, nonce);
         setHeader(HEADER_TIMESTAMP, timestamp);
         setHeader(HEADER_SECRET_PUB, secretPub);
-        const { signStr, err } = doSign([HEADER_NONCE, HEADER_TIMESTAMP, HEADER_SECRET_PUB], new Map().
+        const { signStr, err } = doSign([HEADER_NONCE, HEADER_TIMESTAMP], new Map().
             set(HEADER_NONCE, nonce).
             set(HEADER_TIMESTAMP, timestamp).
-            set(HEADER_TOKEN_PUB, secretPub), getParams(), getBody(), secretPri);
+            set(HEADER_SECRET_PUB, secretPub), getParams(), getBody(), secretPri);
         if (err) {
             console.log("[ security.injectSecret ] err", err);
             return err;
@@ -128,12 +140,12 @@ var security;
     }
     security.injectSecret = injectSecret;
     function injectToken(tokenPub, tokenPri, setHeader, getParams, getBody) {
-        const nonce = (0, unique_1.randID)();
+        const nonce = unique_1.unique.randID();
         const timestamp = new Date().getTime();
         setHeader(HEADER_NONCE, nonce);
         setHeader(HEADER_TIMESTAMP, timestamp);
         setHeader(HEADER_TOKEN_PUB, tokenPub);
-        const { signStr, err } = doSign([HEADER_NONCE, HEADER_TIMESTAMP, HEADER_TOKEN_PUB], new Map().
+        const { signStr, err } = doSign([HEADER_NONCE, HEADER_TIMESTAMP], new Map().
             set(HEADER_NONCE, nonce).
             set(HEADER_TIMESTAMP, timestamp).
             set(HEADER_TOKEN_PUB, tokenPub), getParams(), getBody(), tokenPri);

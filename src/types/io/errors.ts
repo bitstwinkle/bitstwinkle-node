@@ -15,40 +15,40 @@
  *  *  * limitations under the License.
  *
  */
-
-type Type = number
-export namespace errors {
-    export const CODING: Type = -999
-    export const SYSTEM: Type = -444
-    export const APPLICATION: Type = -777
-
-    export function Sys(message: string): UError {
-        return new UniError(errors.SYSTEM, 'local_run_error', message)
-    }
-}
-
-export type UError = {
-    type: Type
-    code: string
-    message: string
-} | null
-
-class UniError {
-    constructor(public type: Type, public code: string, public message: string) {
-    }
-
-    public IsApplication(): boolean {
-        return this.type === errors.APPLICATION
-    }
-
-    public IsCoding(): boolean {
-        return this.type === errors.CODING
-    }
-
-    public IsSystem(): boolean {
-        return this.type === errors.SYSTEM
-    }
-}
+//
+// type Type = number
+// export namespace errors {
+//     export const CODING: Type = -999
+//     export const SYSTEM: Type = -444
+//     export const APPLICATION: Type = -777
+//
+//     export function Sys(message: string): UError {
+//         return new UniError(errors.SYSTEM, 'local_run_error', message)
+//     }
+// }
+//
+// export type UError = {
+//     type: Type
+//     code: string
+//     message: string
+// } | null
+//
+// class UniError {
+//     constructor(public type: Type, public code: string, public message: string) {
+//     }
+//
+//     public IsApplication(): boolean {
+//         return this.type === errors.APPLICATION
+//     }
+//
+//     public IsCoding(): boolean {
+//         return this.type === errors.CODING
+//     }
+//
+//     public IsSystem(): boolean {
+//         return this.type === errors.SYSTEM
+//     }
+// }
 
 
 

@@ -1,7 +1,7 @@
 {
   "name": "bitstwinkle",
   "type": "commonjs",
-  "version": "1.0.2",
+  "version": "1.0.11",
   "description": "The best collection of WEB2 and WEB3 feature packages on the entire internet.",
   "main": "dist/index.js",
   "scripts": {
@@ -12,14 +12,14 @@
   "author": "bitstwinkle",
   "license": "ISC",
   "devDependencies": {
-    "@types/crypto-js": "^4.1.1",
     "@types/node": "^20.5.0",
+    "@types/node-forge": "^1.3.4",
     "@types/uuid": "^9.0.2"
   },
   "dependencies": {
     "axios": "^1.4.0",
     "class-transformer": "^0.5.1",
-    "crypto-js": "^4.1.1",
+    "node-forge": "^1.3.1",
     "tsconfig-paths": "^4.2.0",
     "uuid": "^9.0.0"
   }

@@ -1,4 +1,4 @@
-import { UError } from "../../types/io/errors";
+import { errors } from "../../types/errors";
 export declare namespace security {
     type IToken = {
         token_pub: string;
@@ -16,9 +16,10 @@ export declare namespace security {
         constructor();
         from(src: IToken): void;
         isAvailable(): boolean;
+        isRefreshAvailable(): boolean;
     }
-    function injectSecret(secretPub: string, secretPri: string, setHeader: (k: any, v: any) => void, getParams: () => Map<string, string>, getBody: () => string | null): UError;
-    function injectToken(tokenPub: string, tokenPri: string, setHeader: (k: any, v: any) => void, getParams: () => Map<string, string>, getBody: () => string | null): UError;
+    function injectSecret(secretPub: string, secretPri: string, setHeader: (k: any, v: any) => void, getParams: () => Map<string, string>, getBody: () => string | null): errors.Error;
+    function injectToken(tokenPub: string, tokenPri: string, setHeader: (k: any, v: any) => void, getParams: () => Map<string, string>, getBody: () => string | null): errors.Error;
     function analyzeResponse(get: (k: string) => any): void;
 }
 export type LightToken = {

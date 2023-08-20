@@ -16,8 +16,6 @@
  *
  */
 
-import {UError} from "./io/errors";
-
 export namespace errors {
     export type Type = number
     export const CODING: Type = -999

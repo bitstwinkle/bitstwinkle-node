@@ -1,1 +1,0 @@
-type TimeString = string;

@@ -15,52 +15,52 @@
  *  *  * limitations under the License.
  *
  */
-
-import * as crypto from 'crypto';
-
-export namespace aes {
-
-    export function encrypt(content: string, key: string): string {
-        if (key.startsWith('0x')) {
-            key = key.substring(2)
-        }
-        const keyBuf = Buffer.from(key, 'hex')
-        const plaintext = Buffer.from(content, 'utf8');
-        const iv = crypto.randomBytes(16);
-        if (!iv) {
-            console.log('[ crypto.randomBytes(16) ] error: !iv')
-            return '';
-        }
-
-        let block: crypto.Cipher;
-        try {
-            block = crypto.createCipheriv('aes-256-cbc', keyBuf, iv);
-        } catch (err) {
-            console.log('[ crypto.createCipheriv ] error', err)
-            return ''
-        }
-
-        const ciphertext: Buffer = Buffer.concat([iv, block.update(plaintext), block.final()]);
-
-        return ciphertext.toString('hex');
-    }
-
-    export function decrypt(content: string, key: string): string {
-        try {
-            if (key.startsWith('0x')) {
-                key = key.substring(2)
-            }
-            const keyBuf: Buffer = Buffer.from(key, 'hex')
-            const ciphertext: Buffer = Buffer.from(content, 'hex')
-            const iv: Buffer = ciphertext.subarray(0, 16)
-            const block: crypto.Decipher = crypto.createDecipheriv('aes-256-cbc', keyBuf, iv)
-            let decrypted: Buffer = block.update(ciphertext.subarray(16));
-            decrypted = Buffer.concat([decrypted, block.final()]);
-            return decrypted.toString()
-        } catch (error) {
-            console.log('[ aes.decrypt failed ]', error)
-            return ''
-        }
-    }
-
-}
+//
+// import * as crypto from 'crypto';
+//
+// export namespace aes {
+//
+//     export function encrypt(content: string, key: string): string {
+//         if (key.startsWith('0x')) {
+//             key = key.substring(2)
+//         }
+//         const keyBuf = Buffer.from(key, 'hex')
+//         const plaintext = Buffer.from(content, 'utf8');
+//         const iv = crypto.randomBytes(16);
+//         if (!iv) {
+//             console.log('[ crypto.randomBytes(16) ] error: !iv')
+//             return '';
+//         }
+//
+//         let block: crypto.Cipher;
+//         try {
+//             block = crypto.createCipheriv('aes-256-cbc', keyBuf, iv);
+//         } catch (err) {
+//             console.log('[ crypto.createCipheriv ] error', err)
+//             return ''
+//         }
+//
+//         const ciphertext: Buffer = Buffer.concat([iv, block.update(plaintext), block.final()]);
+//
+//         return ciphertext.toString('hex');
+//     }
+//
+//     export function decrypt(content: string, key: string): string {
+//         try {
+//             if (key.startsWith('0x')) {
+//                 key = key.substring(2)
+//             }
+//             const keyBuf: Buffer = Buffer.from(key, 'hex')
+//             const ciphertext: Buffer = Buffer.from(content, 'hex')
+//             const iv: Buffer = ciphertext.subarray(0, 16)
+//             const block: crypto.Decipher = crypto.createDecipheriv('aes-256-cbc', keyBuf, iv)
+//             let decrypted: Buffer = block.update(ciphertext.subarray(16));
+//             decrypted = Buffer.concat([decrypted, block.final()]);
+//             return decrypted.toString()
+//         } catch (error) {
+//             console.log('[ aes.decrypt failed ]', error)
+//             return ''
+//         }
+//     }
+//
+// }

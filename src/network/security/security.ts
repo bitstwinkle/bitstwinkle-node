@@ -16,11 +16,11 @@
  *
  */
 
-import {UError} from "../../types/io/errors";
-import {createHmac} from "crypto";
-import {randID} from "../../tools/unique/unique";
-import {sys} from "../../tools/sys/sys";
+import {errors} from "../../types/errors";
+import {unique} from "../../tools/unique";
+import {sys} from "../../tools/sys";
 import {Expose} from "class-transformer";
+import {crypto} from "../../tools/crypto";
 
 const bodyInside = '__b_o_d_y__'
 
@@ -30,7 +30,7 @@ function doSign(
     params: Map<string, string>,
     body: string | null,
     token: string,
-): { signStr: string; err: UError } {
+): { signStr: string; err: errors.Error } {
     let buf = ''
 
     if (signHeader && headers) {
@@ -60,13 +60,10 @@ function doSign(
     }
 
     if (sys.isRd()) {
-        console.log("[ security.doSign ] buf to sign:", buf)
+        console.log("[ security.doSign ] buf to sign:", buf, " use token: " + token)
     }
 
-    const key = Buffer.from(token);
-    const h = createHmac('sha256', key);
-    h.update(buf);
-    const signature = h.digest('hex');
+    const signature = crypto.sha256(buf, token);
     return {signStr: signature, err: null};
 }
 
@@ -134,6 +131,22 @@ export namespace security {
             }
             return true
         }
+
+        isRefreshAvailable(): boolean {
+            if (this.refreshTokenPri.length === 0 || this.refreshTokenPub.length === 0) {
+                if (sys.isRd()) {
+                    console.log('[ security.isAvailable ] refresh token empty, or refresh token pub empty')
+                }
+                return false
+            }
+            if (this.refreshTokenExpire < new Date()) {
+                if (sys.isRd()) {
+                    console.log('[ security.isAvailable ] refresh token expire')
+                }
+                return false
+            }
+            return true
+        }
     }
 
     export function injectSecret(
@@ -142,8 +155,8 @@ export namespace security {
         setHeader: (k: any, v: any) => void,
         getParams: () => Map<string, string>,
         getBody: () => string|null,
-    ): UError {
-        const nonce = randID()
+    ): errors.Error {
+        const nonce = unique.randID()
         const timestamp = new Date().getTime()
 
         setHeader(HEADER_NONCE, nonce)
@@ -151,11 +164,11 @@ export namespace security {
         setHeader(HEADER_SECRET_PUB, secretPub)
 
         const {signStr, err} = doSign(
-            [HEADER_NONCE, HEADER_TIMESTAMP, HEADER_SECRET_PUB],
+            [HEADER_NONCE, HEADER_TIMESTAMP],
             new Map().
-            set(HEADER_NONCE, nonce).
-            set(HEADER_TIMESTAMP, timestamp).
-            set(HEADER_TOKEN_PUB, secretPub),
+                set(HEADER_NONCE, nonce).
+                set(HEADER_TIMESTAMP, timestamp).
+                set(HEADER_SECRET_PUB, secretPub),
             getParams(),
             getBody(),
             secretPri,
@@ -180,8 +193,8 @@ export namespace security {
         setHeader: (k: any, v: any) => void,
         getParams: () => Map<string, string>,
         getBody: () => string|null,
-    ): UError {
-        const nonce = randID()
+    ): errors.Error {
+        const nonce = unique.randID()
         const timestamp = new Date().getTime()
 
         setHeader(HEADER_NONCE, nonce)
@@ -189,7 +202,7 @@ export namespace security {
         setHeader(HEADER_TOKEN_PUB, tokenPub)
 
         const {signStr, err} = doSign(
-            [HEADER_NONCE, HEADER_TIMESTAMP, HEADER_TOKEN_PUB],
+            [HEADER_NONCE, HEADER_TIMESTAMP],
             new Map().
                 set(HEADER_NONCE, nonce).
                 set(HEADER_TIMESTAMP, timestamp).
